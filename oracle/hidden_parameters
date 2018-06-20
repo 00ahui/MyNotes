@@ -1,0 +1,33 @@
+set linesize 160
+
+col KSPPINM FOR a40
+col KSPPSTVL FOR a15
+col KSPPDESC FOR a80
+
+SELECT ksppinm, ksppstvl, ksppdesc 
+          FROM x$ksppi x, x$ksppcv y
+          WHERE x.indx = y.indx and ksppinm like '%';
+
+
+
+-- change backup I/O size
+
+SELECT ksppinm, ksppstvl, ksppdesc
+FROM x$ksppi x, x$ksppcv y
+WHERE x.indx = y.indx
+and KSPPINM like '_backup%';
+
+-- before 11.2
+alter system set "_backup_ksfq_bufsz" = 2097152 scope=spfile;
+-- after 11.2
+alter system set "_backup_file_bufsz" = 2097152 scope=spfile;
+
+run{
+allocate channel c1 device type disk format '+BKP/%u';
+backup tablespace bkts;
+}
+
+-- check buffer size
+select sid,buffer_size,buffer_count from v$backup_async_io;
+
+

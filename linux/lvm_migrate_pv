@@ -1,0 +1,12 @@
+printf "n\np\n\n\n\nw\n" | fdisk /dev/sdb
+pvcreate /dev/sdb1
+vgextend cpsVG /dev/sdb1
+pvchange -xn /dev/sda2
+pvmove -i 10 /dev/sda2
+vgreduce cpsVG /dev/sda2
+pvremove /dev/sda2
+lvextend -L +150G /dev/mapper/cpsVG-swift
+xfs_growfs /dev/mapper/cpsVG-swift
+lvextend -L +400G /dev/mapper/cpsVG-image
+resize2fs /dev/mapper/cpsVG-image
+df -h

@@ -1,0 +1,12 @@
+su - oracle
+su root
+cd /tmp # avoid wrong operation
+crsctl stop crs
+for pid in `ps -ef | grep $GRID_HOME | grep -v grep | awk '{print $2}'`; do kill -9 $pid; done
+rm /etc/init.d/ohasd
+rm -rf /var/tmp/.oracle/
+rm -rf /etc/oraInst.loc /etc/oracle/ /etc/oratab
+rm -rf /usr/local/bin/coraenv /usr/local/bin/dbhome /usr/local/bin/oraenv
+rm -rf $ORACLE_BASE/*
+rm -rf $GRID_HOME/*
+rm -rf /opt/oracle/oraInventory 

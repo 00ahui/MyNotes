@@ -1,0 +1,39 @@
+select group#,thread#,bytes/1024/1024,status from v$log;
+
+alter database drop logfile group 3;
+alter database drop logfile group 4;
+alter database drop logfile group 5;
+alter database drop logfile group 8;
+alter database drop logfile group 9;
+alter database drop logfile group 10;
+
+alter database add logfile thread 1 group 3 ( '+LDBSYS0/group3_thread1.log') size 512M ;
+alter database add logfile thread 1 group 4 ( '+LDBSYS0/group4_thread1.log') size 512M ;
+alter database add logfile thread 1 group 5 ( '+LOG/group5_thread1.log') size 500M ;
+alter database add logfile thread 2 group 8 ( '+LOG/group8_thread2.log') size 500M ;
+alter database add logfile thread 2 group 9 ( '+LOG/group9_thread2.log') size 500M ;
+alter database add logfile thread 2 group 10 ( '+LOG/group10_thread2.log') size 500M ;
+
+thread 1:
+ALTER SYSTEM  SWITCH LOGFILE;
+ALTER SYSTEM  SWITCH LOGFILE;
+
+thread 2:
+ALTER SYSTEM  SWITCH LOGFILE;
+ALTER SYSTEM  SWITCH LOGFILE;
+
+alter system checkpoint global;
+select group#,thread#,bytes/1024/1024,status from v$log;
+
+alter database drop logfile group 1;
+alter database drop logfile group 2;
+alter database drop logfile group 6;
+alter database drop logfile group 7;
+
+alter database add logfile thread 1 group 1 ( '+LDBSYS0/group1_thread1.log') size 512M ;
+alter database add logfile thread 1 group 2 ( '+LDBSYS0/group2_thread1.log') size 512M ;
+alter database add logfile thread 2 group 6 ( '+LOG/group6_thread2.log') size 500M ;
+alter database add logfile thread 2 group 7 ( '+LOG/group7_thread2.log') size 500M ;
+
+
+select group#,thread#,bytes/1024/1024,status from v$log;

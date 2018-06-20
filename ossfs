@@ -1,0 +1,9 @@
+https://github.com/aliyun/ossfs
+
+echo <bucket>:<accessKey>:<securityKey> > /etc/passwd-ossfs
+chmod 640 /etc/passwd-ossfs
+
+ossfs <bucket> /tmp/ossfs -ourl=http://oss-cn-hangzhou.aliyuncs.com
+
+# /etc/fstab
+ossfs#<bucket> /var/lib/irods/Vault/archive fuse _netdev,url=http://oss-cn-shenzhen-internal.aliyuncs.com,allow_other 0 0

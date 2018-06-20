@@ -1,0 +1,9 @@
+i=1; DS="VSI-M-B5"
+for DISK in `ls /dev/disks/naa.* | grep -v :`; do
+ echo $DS-$i $DISK;
+ /sbin/partedUtil "setptbl" "$DISK" "gpt"
+ SIZE=`/sbin/partedUtil "getptbl" "$DISK" | awk '{if(NR==2){print $4-2048}}'`
+ /sbin/partedUtil "setptbl" "$DISK" "gpt" "1 2048 $SIZE AA31E02A400F11DB9590000C2911D1B8 0"
+ vmkfstools -C vmfs5 -S $DS-$i $DISK:1
+ i=$(($i+1))
+done
