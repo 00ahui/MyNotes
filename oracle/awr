@@ -1,0 +1,8 @@
+set ti on
+
+exec dbms_workload_repository.create_snapshot;
+
+define report_type=text
+define report_name=/home/oracle/awrrpt.txt
+@?/rdbms/admin/awrrpt.sql
+

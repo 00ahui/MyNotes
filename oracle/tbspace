@@ -1,0 +1,10 @@
+create bigfile tablespace sunecm
+datafile '/opt/oracle/usr/oradb/sunecm.dbf' size 128m autoextend on next 128m;
+
+create bigfile temporary tablespace sunecm_temp
+  tempfile '/opt/oracle/usr/oradb/sunecm_temp.dbf' size 128m autoextend on next 128m;
+
+
+create smallfile tablespace ebank datafile
+  '+usr/ebank/ebank01' size 30g,
+  '+usr/ebank/ebank02' size 30g;

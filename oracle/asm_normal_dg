@@ -1,0 +1,37 @@
+select group_number,name,state,type,compatibility from v$asm_diskgroup;
+
+ALTER DISKGROUP GRID SET ATTRIBUTE 'compatible.asm' = '12.1';
+ALTER DISKGROUP GRID SET ATTRIBUTE 'compatible.rdbms' = '12.1';
+ALTER DISKGROUP GRID SET ATTRIBUTE 'disk_repair_time' = '120h';
+ALTER DISKGROUP GRID SET ATTRIBUTE 'failgroup_repair_time' = '120h';
+
+alter system set rebalance_power=11;
+
+ALTER DISKGROUP DATA ONLINE ALL;
+
+ALTER DISKGROUP DATA ADD FAILGROUP DATA001 DISK '/dev/huawei/Site1-DATA*';
+ALTER DISKGROUP DATA rebalance power 8;
+
+alter diskgroup DATA add 
+failgroup DATA001 disk '/dev/huawei/LUN_DATA02*'
+failgroup DATA002 disk '/dev/huawei/LUN_DATA03*';
+
+select dg.name dgname,d.name disk,mount_status,d.state,failgroup,path,REPAIR_TIMER,
+WRITE_TIMEOUT,PREFERRED_READ,VOTING_FILE,FAILGROUP_TYPE 
+from v$asm_disk d, v$asm_diskgroup dg
+where dg.group_number = d.group_number
+order by dg.name,failgroup,d.name
+
+select distinct dg.name dgname,mount_status,failgroup
+from v$asm_disk d, v$asm_diskgroup dg
+where dg.group_number = d.group_number
+order by dg.name,failgroup
+
+SELECT dg.name AS diskgroup, SUBSTR(a.name,1,30) AS name,
+SUBSTR(a.value,1,24) AS value, read_only FROM V$ASM_DISKGROUP dg, 
+V$ASM_ATTRIBUTE a WHERE dg.name = 'DATA'
+AND dg.group_number = a.group_number;
+
+SELECT SUBSTR(d.name,1,16) AS asmdisk, d.mount_status, d.state, 
+dg.name AS diskgroup FROM V$ASM_DISKGROUP dg, V$ASM_DISK d 
+WHERE dg.group_number = d.group_number;

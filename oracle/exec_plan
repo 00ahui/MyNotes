@@ -1,0 +1,60 @@
+@?/rdbms/admin/utlxplan.sql
+
+explain plan for ...;
+
+select plan_table_output from table(dbms_xplan.display());
+
+
+
+
+-- History execute plan: 
+
+select to_char(b.BEGIN_INTERVAL_TIME,'yymmdd hh24:mi') begin,to_char(b.END_INTERVAL_TIME,'yymmdd hh24:mi') end,
+       a.PLAN_HASH_VALUE plan_hash,a.EXECUTIONS_DELTA execs,
+       round(DISK_READS_DELTA/DECODE(EXECUTIONS_DELTA,0,1,EXECUTIONS_DELTA)) DISK_READS,
+       round(BUFFER_GETS_DELTA/decode(EXECUTIONS_DELTA,0,1,EXECUTIONS_DELTA)) BUF_GETS,
+       round(ELAPSED_TIME_DELTA*POWER(10,-6)/decode(EXECUTIONS_DELTA,0,1,EXECUTIONS_DELTA),5) ELAP_TIME,
+       round(CPU_TIME_DELTA*POWER(10,-6)/decode(EXECUTIONS_DELTA,0,1,EXECUTIONS_DELTA),5) CPU_TIME,
+       round(IOWAIT_DELTA*POWER(10,-6)/decode(EXECUTIONS_DELTA,0,1,EXECUTIONS_DELTA),3) IOWAIT,
+       round(APWAIT_DELTA*POWER(10,-6)/decode(EXECUTIONS_DELTA,0,1,EXECUTIONS_DELTA),3) APWAIT,
+       round(CCWAIT_DELTA*POWER(10,-6)/decode(EXECUTIONS_DELTA,0,1,EXECUTIONS_DELTA),3) CCWAIT,
+       round(ROWS_PROCESSED_DELTA/decode(EXECUTIONS_DELTA,0,1,EXECUTIONS_DELTA)) rowsp
+  from dba_hist_sqlstat  a, dba_hist_snapshot b
+ where a.sql_id='&sql_id' and a.snap_id = b.snap_id and a.instance_number=1  order by b.begin_interval_time;
+
+SELECT * FROM TABLE(DBMS_XPLAN.display_awr('&sql_id'));
+
+
+-- Check execute plan change:
+
+
+set linesize 200
+
+select a.sql_id, a.PLAN_HASH_VALUE plan_hash,
+       to_char(b.BEGIN_INTERVAL_TIME,'yymmdd hh24:mi') begin,
+       to_char(b.END_INTERVAL_TIME,'yymmdd hh24:mi') end,
+       a.EXECUTIONS_DELTA execs,
+       round(DISK_READS_DELTA/DECODE(EXECUTIONS_DELTA,0,1,EXECUTIONS_DELTA)) DISK_READS,
+       round(BUFFER_GETS_DELTA/decode(EXECUTIONS_DELTA,0,1,EXECUTIONS_DELTA)) BUF_GETS,
+       round(ELAPSED_TIME_DELTA*POWER(10,-6)/decode(EXECUTIONS_DELTA,0,1,EXECUTIONS_DELTA),5) ELAP_TIME,
+       round(CPU_TIME_DELTA*POWER(10,-6)/decode(EXECUTIONS_DELTA,0,1,EXECUTIONS_DELTA),5) CPU_TIME,
+       round(IOWAIT_DELTA*POWER(10,-6)/decode(EXECUTIONS_DELTA,0,1,EXECUTIONS_DELTA),3) IOWAIT,
+       round(APWAIT_DELTA*POWER(10,-6)/decode(EXECUTIONS_DELTA,0,1,EXECUTIONS_DELTA),3) APWAIT,
+       round(CCWAIT_DELTA*POWER(10,-6)/decode(EXECUTIONS_DELTA,0,1,EXECUTIONS_DELTA),3) CCWAIT,
+       round(ROWS_PROCESSED_DELTA/decode(EXECUTIONS_DELTA,0,1,EXECUTIONS_DELTA)) rowsp
+  from dba_hist_sqlstat  a, dba_hist_snapshot b
+where b.BEGIN_INTERVAL_TIME > to_date('2017-04-07 00:00:00','YYYY-MM-DD HH24:MI:SS')
+   and b.END_INTERVAL_TIME < to_date('2017-04-10 23:59:59','YYYY-MM-DD HH24:MI:SS')
+   and a.instance_number=1
+   and a.snap_id = b.snap_id
+   and a.sql_id in (
+select sql_id from (
+select sql_id, count(plan_hash) plan_count from (
+select distinct a.sql_id, a.PLAN_HASH_VALUE plan_hash
+  from dba_hist_sqlstat  a, dba_hist_snapshot b
+where a.snap_id = b.snap_id and a.instance_number=1
+   and b.BEGIN_INTERVAL_TIME > to_date('2017-04-07 00:00:00','YYYY-MM-DD HH24:MI:SS')
+   and b.END_INTERVAL_TIME < to_date('2017-04-10 23:59:59','YYYY-MM-DD HH24:MI:SS')
+) group by sql_id
+) where plan_count > 1
+) order by b.begin_interval_time;

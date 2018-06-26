@@ -1,0 +1,17 @@
+select SAMPLE_ID,SAMPLE_TIME,DELTA_TIME,SESSION_ID,SESSION_SERIAL#,SQL_ID from v$active_session_history 
+where user_id=(select user_id from all_users where username='MCMIS_CORE') order by sample_id;
+
+select sql_text from v$sqltext where sql_id='fcg931953bpw7' order by piece
+
+select sid,sql_id,sql_text from v$open_cursor where USER_NAME='MCMIS_CORE'
+
+select sql_id,executions,to_char(last_active_time,'HH24:MI:SS'),sql_text from v$sql
+where last_active_time>(sysdate-10/(24*60*60)) and PARSING_SCHEMA_NAME='MCMIS_CORE'
+order by last_active_time;
+
+set pagesize 0
+set linesize 1000
+col sql_text for a1000
+select TO_CHAR(last_active_time, 'HH24:MI:SS  ' ) || sql_id || '  ' || EXECUTIONS || chr(10) || sql_text || ';' from v$sql
+where last_active_time>(sysdate-10/(24*60*60)) and PARSING_SCHEMA_NAME='MCMIS_CORE'
+order by last_active_time;

@@ -1,0 +1,2 @@
+for f in /sys/class/fc_remote_ports/*/dev_loss_tmo; do echo 1 > $f; done
+

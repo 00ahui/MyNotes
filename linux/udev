@@ -1,0 +1,9 @@
+# RHEL6, Huawei LUN
+upadmin show vlun | awk '/Site1/{print "KERNEL==\"sd?*\", BUS==\"scsi\", PROGRAM==\"/sbin/scsi_id -g -u /dev/$name\", RESULT==\"3"$4"\", NAME=\"huawei/Site1-"$3"\", OWNER=\"oracle\", GROUP=\"dba\", MODE=\"0660\""}'
+
+udevadm control --reload-rules
+start_udev
+
+# RHEL6 DM
+KERNEL=="dm-[0-9]*", PROGRAM="/sbin/dmsetup info -c --noheadings -o UUID -j %M -m %m", RESULT=="mpath-3600507680181877be0000000000000f4", NAME="oracle/sys", OWNER="oracle", GROUP="dba", MODE="0660"
+

@@ -1,0 +1,12 @@
+npm config list
+npm config set fetch-retries 10
+npm config set maxsockets 2
+npm config set https-proxy "http://w00389040:<password>@8.46.117.98:8080/"
+npm config set proxy "http://w00389040:<password>@8.46.117.98:8080/"
+
+-- install dependency modules in packages.json
+npm i
+
+-- install a local module
+npm install meow-5.0.0.tgz
+

@@ -1,0 +1,6 @@
+col tablespace_name for a30
+col file_name for a60
+set linesize 160
+select f1.TABLESPACE_NAME, f1.FILE_NAME, f2.CREATE_BYTES/1024/1024 create_mb, f1.BYTES/1024/1024 current_mb,
+       f1.AUTOEXTENSIBLE, f1.INCREMENT_BY*f2.BLOCK_SIZE/1024/1024 incement_mb
+  from dba_data_files f1, v$datafile f2 where f1.FILE_ID = f2.file# order by f2.ts#,f2.file#;

@@ -1,0 +1,64 @@
+
+run{
+ configure controlfile autobackup on;
+ configure controlfile autobackup format for device type disk to '/SunECMBK/SunECMDB/cf_%F';
+ allocate channel c1 device type disk format '/SunECMBK/SunECMDB/%u';
+ allocate channel c2 device type disk format '/SunECMBK/SunECMDB/%u';
+ allocate channel c3 device type disk format '/SunECMBK/SunECMDB/%u';
+ allocate channel c4 device type disk format '/SunECMBK/SunECMDB/%u';
+ BACKUP DATABASE PLUS ARCHIVELOG;
+}
+
+
+set newname for datafile 1 to '/opt/oracle/logdb/log/system';
+set newname for datafile 2 to '/opt/oracle/logdb/log/sysaux';
+set newname for datafile 3 to '/opt/oracle/logdb/log/undotbs1';
+set newname for datafile 4 to '/opt/oracle/logdb/log/users';
+restore database;
+switch datafile all;
+
+
+# backup script
+
+CONFIGURE CONTROLFILE AUTOBACKUP ON;
+CONFIGURE CONTROLFILE AUTOBACKUP FORMAT FOR DEVICE TYPE DISK TO '/rmanback/%F';
+RUN{
+ALLOCATE CHANNEL C1 DEVICE TYPE DISK FORMAT '/rmanback/%U';
+ALLOCATE CHANNEL C2 DEVICE TYPE DISK FORMAT '/rmanback/%U';
+ALLOCATE CHANNEL C3 DEVICE TYPE DISK FORMAT '/rmanback/%U';
+ALLOCATE CHANNEL C4 DEVICE TYPE DISK FORMAT '/rmanback/%U';
+BACKUP DATABASE PLUS ARCHIVELOG;
+}
+
+
+# restore script
+# restore spfile and change location in pfile 1st
+
+restore controlfile from '/rmanback/c-1502082600-20160913-00';
+alter database mount;
+RUN{
+set newname for datafile 1 to '+C2RB_DATA';
+set newname for datafile 2 to '+C2RB_DATA';
+set newname for datafile 3 to '+C2RB_DATA';
+set newname for datafile 4 to '+C2RB_DATA';
+set newname for datafile 5 to '+C2RB_DATA';
+set newname for datafile 6 to '+C2RB_DATA';
+
+set archivelog destination to '+C2RB_ARCH';
+
+change archivelog all uncatalog;
+
+ALLOCATE CHANNEL C1 DEVICE TYPE DISK FORMAT '/rmanback/%U';
+ALLOCATE CHANNEL C2 DEVICE TYPE DISK FORMAT '/rmanback/%U';
+ALLOCATE CHANNEL C3 DEVICE TYPE DISK FORMAT '/rmanback/%U';
+ALLOCATE CHANNEL C4 DEVICE TYPE DISK FORMAT '/rmanback/%U';
+
+RESTORE ARCHIVELOG ALL;
+-- RESTORE ARCHIVELOG from sequence n;
+
+RESTORE DATABASE;
+switch datafile all;
+
+RECOVER DATABASE;
+}
+alter database open resetlogs;
