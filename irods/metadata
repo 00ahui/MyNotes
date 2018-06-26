@@ -1,0 +1,34 @@
+iput video1.mp4 --metadata "speaker;John;;subject;SAN Storage;;length;20;min;"
+iput video2.wav --metadata "speaker;Marry;;subject;Data Management;;length;30;min;"
+
+
+
+imeta qu -d speaker = John
+
+imeta qu -d length 'n<' 60
+
+
+imeta add -d video2.wav location Chengdu
+
+
+
+isysmeta ls -l video2.wav
+
+isysmeta mod hello2.txt +1h       # set expire time
+
+isysmeta mod hello2.txt 2018-06-26       # set expire time
+
+isysmeta mod hello2.txt datatype 'text‘   # set data type
+
+isysmeta mod hello2.txt comment 0 'my file‘   # set comment for replica 0
+
+
+
+iquest "%s/%s %d" "SELECT COLL_NAME, DATA_NAME,DATA_SIZE  where DATA_NAME like '%.mp4'“
+
+iquest "%s/%s %d" "SELECT COLL_NAME, DATA_NAME,DATA_SIZE  where DATA_CREATE_TIME n< '`date --date='2018-07-21 09:00:00' +%s`'“
+
+
+
+iquest "%d %s" "select sum(DATA_SIZE),RESC_NAME where COLL_NAME = '/zone0/home/admin'"
+

@@ -1,0 +1,65 @@
+iadmin mkresc edge1 unixfilesystem irods:/var/lib/irods/Vault/edge1
+iadmin mkresc edge2 unixfilesystem irods:/var/lib/irods/Vault/edge2
+iadmin mkresc edge3 unixfilesystem irods:/var/lib/irods/Vault/edge3
+iadmin mkresc center unixfilesystem irods:/var/lib/irods/Vault/center
+iadmin mkresc edge replication
+iadmin addchildtoresc edge edge1
+iadmin addchildtoresc edge edge2
+iadmin addchildtoresc edge edge3
+
+ilsresc
+center:unixfilesystem
+edge:replication
+├── edge1:unixfilesystem
+├── edge2:unixfilesystem
+└── edge3:unixfilesystem
+
+# write to edge
+echo hello > /var/lib/irods/Vault/edge1/home/admin/hello1.txt
+echo hello > /var/lib/irods/Vault/edge2/home/admin/hello2.txt
+echo hello > /var/lib/irods/Vault/edge3/home/admin/hello3.txt
+
+# register from edge
+ireg -C /var/lib/irods/Vault/edge1/home/admin /zone0/home/admin -f -R edge
+ireg -C /var/lib/irods/Vault/edge2/home/admin /zone0/home/admin -f -R edge
+ireg -C /var/lib/irods/Vault/edge3/home/admin /zone0/home/admin -f -R edge
+
+ ils -l
+/zone0/home/admin:
+  admin             0 unify:edge;edge1            6 2018-06-21.17:05 & hello2.txt
+  admin             0 unify:edge;edge2            6 2018-06-21.17:05 & hello1.txt
+  admin             0 unify:edge;edge3            6 2018-06-21.17:05 & hello3.txt
+
+# replicate to center
+irepl -R center -S edge hello1.txt hello2.txt hello3.txt
+
+ils -l
+/zone0/home/admin:
+  admin             0 edge;edge2            6 2018-06-21.17:05 & hello1.txt
+  admin             1 center            6 2018-06-21.17:21 & hello1.txt
+  admin             0 edge;edge1            6 2018-06-21.17:05 & hello2.txt
+  admin             1 center            6 2018-06-21.17:21 & hello2.txt
+  admin             0 edge;edge3            6 2018-06-21.17:05 & hello3.txt
+  admin             1 center            6 2018-06-21.17:21 & hello3.txt
+
+
+# write to center
+echo hello > /var/lib/irods/Vault/center/home/admin/hello4.txt
+
+# register from enter
+ireg -C /var/lib/irods/Vault/center/home/admin /zone0/home/admin -f -R center
+
+ ils -l
+/zone0/home/admin:
+  admin             0 center            6 2018-06-21.17:05 & hello4.txt
+
+# replicate to edge
+irepl -R edge -S center hello1.txt
+
+ils -l
+/zone0/home/admin:
+  admin             0 center            6 2018-06-21.17:21 & hello4.txt
+  admin             1 edge;edge2            6 2018-06-21.17:05 & hello4.txt
+  admin             2 edge;edge1            6 2018-06-21.17:05 & hello4.txt
+  admin             3 edge;edge3            6 2018-06-21.17:05 & hello4.txt
+

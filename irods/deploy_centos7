@@ -1,0 +1,53 @@
+-- Create iRODS YUM Repository
+rpm --import https://packages.irods.org/irods-signing-key.asc
+wget -qO - https://packages.irods.org/renci-irods.yum.repo | sudo tee /etc/yum.repos.d/renci-irods.yum.repo
+
+
+-- Create EPEL YUM Repository
+wget http://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+rpm -ivh epel-release-latest-7.noarch.rpm
+
+-- Install PostgreSQL 
+yum install postgresql-server postgresql-contrib postgresql-devel
+
+-- Initialize database
+postgresql-setup initdb
+
+-- Enable password authentication
+vi /var/lib/pgsql/data/pg_hba.conf
+host    all             all             127.0.0.1/32            md5
+
+-- Start and enable PostgreSQL
+systemctl start postgresql
+systemctl enable postgresql
+
+-- Create database and users for iCAT
+sudo -i -u postgres
+psql
+CREATE USER irods WITH PASSWORD 'irods';
+CREATE DATABASE "ICAT";
+GRANT ALL PRIVILEGES ON DATABASE "ICAT" TO irods;
+
+-- Install iRODS packages:
+yum install irods-server irods-database-plugin-postgres
+
+-- Setup iRODS:
+python /var/lib/irods/scripts/setup_irods.py
+
+-- Link env file:
+ln -s /var/lib/irods/.irods .irods
+
+-- OR set the env file location:
+export IRODS_ENVIRONMENT_FILE=/var/lib/irods/.irods/irods_environment.json
+
+-- show env:
+ievn
+
+-- Configuration files
+/etc/irods/server_config.json
+/etc/irods/hosts_config.json
+/etc/irods/host_access_control_config.json
+
+-- Log files
+/var/lib/irods/log/
+

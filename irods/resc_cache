@@ -1,0 +1,35 @@
+iadmin mkresc resc1 unixfilesystem irods:/var/lib/irods/Vault/cache
+iadmin mkresc resc2 unixfilesystem irods:/var/lib/irods/Vault/archive
+iadmin mkresc resc0 compound
+iadmin addchildtoresc resc0 resc1 cache
+iadmin addchildtoresc resc0 resc2 archive
+
+ilsresc
+resc0:compound
+├── resc1:unixfilesystem
+└── resc2:unixfilesystem
+
+
+iput hello1.txt -R resc0
+
+ils -l
+/zone0/home/admin:
+  admin             0 resc0;resc1            6 2018-06-20.14:31 & hello1.txt
+  admin             1 resc0;resc2            6 2018-06-20.14:31 & hello1.txt
+
+
+
+itrim -S resc1 --age 1440 hello1.txt
+
+ils -l
+/zone0/home/admin:
+  admin             1 resc0;resc2            6 2018-06-20.14:31 & hello1.txt
+
+
+iget hello1.txt -
+
+ils -l
+/zone0/home/admin:
+ admin             0 resc0;resc1            6 2018-06-20.14:31 & hello1.txt
+ admin             1 resc0;resc2            6 2018-06-20.14:31 & hello1.txt
+

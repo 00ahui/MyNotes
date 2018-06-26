@@ -1,0 +1,75 @@
+irods-grid status --all
+
+-- Init session
+iinit
+
+-- Create compound resource
+iadmin mkresc compResc compound
+iadmin mkresc cacheResc unixfilesystem irods:/irods/compound/cache
+iadmin mkresc archiveResc unixfilesystem irods:/irods/compound/archive
+iadmin addchildtoresc compResc cacheResc cache
+iadmin addchildtoresc compResc archiveResc archive
+
+-- Create deferred resource
+iadmin mkresc deferResc deferred
+iadmin addchildtoresc deferResc resc1
+iadmin addchildtoresc deferResc resc2
+
+-- Create random resource
+iadmin mkresc rndResc random
+iadmin addchildtoresc rndResc resc1
+iadmin addchildtoresc rndResc resc2
+
+-- Create replication resource
+iadmin mkresc replResc replication
+iadmin addchildtoresc replResc resc1
+iadmin addchildtoresc replResc resc2
+
+-- Rebalance replication resource (replicate all to all)
+iadmin modresc replResc rebalance
+
+-- Create round_robin resource
+iadmin mkresc rrResc roundrobin
+iadmin addchildtoresc rrResc resc1
+iadmin addchildtoresc rrResc resc2
+
+-- Set free resource (bytes)
+iadmin modresc resc1 freespace 107065884672
+iadmin modresc resc2 freespace 107025514496
+
+-- put 
+iput video1.mp4 --metadata "speaker;John;;subject;SAN Storage;;length;20;min;"
+iput video2.wav --metadata "speaker;Marry;;subject;Data Management;;length;30;min;"
+
+-- register
+ireg -C /irods/compound/archive/home/rods/video /zone0/home/rods/video -f
+
+-- meta
+imeta ls -d video5.mp4
+imeta qu -d speaker = John
+imeta qu -d length 'n<' 30
+
+imeta add -d video2.wav location Chengdu
+
+imeta mod -d video2.wav length 25 min
+
+
+-- query database
+iquest attrs
+iquest "select USER_ID,USER_NAME"
+iquest "select sum(DATA_SIZE),RESC_NAME where COLL_NAME = '/zone0/home/rods/video'"
+iquest " File: %s, User: %-6.6s, Access: %-5.5s" "SELECT DATA_NAME, USER_NAME, DATA_ACCESS_NAME  WHERE COLL_NAME = '/zone0/home/rods/video'"
+iquest "%s/%s %d" "SELECT COLL_NAME, DATA_NAME,DATA_SIZE  where DATA_CREATE_TIME n< '`date --date='2018-07-21 09:00:00' +%s`'"
+iquest "%s/%s %d" "SELECT COLL_NAME, DATA_NAME,DATA_SIZE  where DATA_NAME like '%.mp4'"
+
+
+-- Install S3 plugin
+yum install irods-resource-plugin-s3
+
+-- Use S3 plugin （failed）
+iadmin mkresc compResc compound
+iadmin mkresc resc1 unixfilesystem irods:/var/lib/irods/Vault/cache
+iadmin mkresc resc_s3 s3 irods:/irods/archive "S3_DEFAULT_HOSTNAME=oss-cn-shenzhen-internal.aliyuncs.com;S3_AUTH_FILE=/root/aliyun/oss.key;S3_RETRY_COUNT=3;S3_WAIT_TIME_SEC=1;S3_PROTO=HTTPS"
+iadmin mkresc resc_s3 s3 irods:/irods/archive "S3_REGIONNAME=ap-southeast-1;S3_DEFAULT_HOSTNAME=s3.amazonaws.com;S3_AUTH_FILE=/root/aws/s3.key;S3_STSDATE=;S3_RETRY_COUNT=15;S3_WAIT_TIME_SEC=1;S3_PROTO=HTTPS;S3_MPU_CHUNK=10;S3_MPU_THREADS=4;S3_ENABLE_MD5=1;S3_SIGNATURE_VERSION=2;ARCHIVE_NAMING_POLICY=decoupled"
+
+

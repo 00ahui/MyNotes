@@ -1,0 +1,74 @@
+iadmin mkuser yao rodsuser               # create user
+
+iadmin moduser yao password xxxx            # set user password
+
+iadmin mkgroup devgroup                 # create group
+
+iadmin atg devgroup yao                 # add user to group
+
+iadmin sgq devgroup resc1 107374182400        # set group quota, in bytes
+
+iadmin suq yao resc1 10737418240           # set user quota, in bytes
+
+ichmod -r read devgroup /zone0/home/admin      # set ACL as admin
+ichmod write devgroup /zone0/home/admin/hello1.txt  # set ACL as admin
+
+ils -A /zone0/home/admin                # show ACL
+/zone0/home/admin:
+        ACL - g:devgroup#zone0:read object   admin#zone0:own
+        Inheritance - Disabled
+  hello1.txt
+        ACL - devgroup#zone0:modify object   admin#zone0:own
+  hello2.txt
+        ACL - devgroup#zone0:read object   admin#zone0:own
+
+
+su - yao
+
+iinit
+
+iput hello1.txt -R resc1
+ils -l
+/zone0/home/yao:
+  yao               0 resc1            6 2018-06-22.17:16 & hello1.txt
+
+iget /zone0/home/admin/hello1.txt
+
+
+
+# ticket test
+
+ichmod -r null devgroup /zone0/home/admin   # remove ACL
+
+iticket create read /zone0/home/admin/hello1.txt
+ticket:Sja0aRiE2FKIWHk
+
+iticket mod Sja0aRiE2FKIWHk add user yao
+iticket mod Sja0aRiE2FKIWHk expire 2018-06-25.18:00:00
+iticket mod Sja0aRiE2FKIWHk uses 100
+
+iticket ls
+id: 10071
+string: Sja0aRiE2FKIWHk
+ticket type: read
+obj type: data
+owner name: admin
+owner zone: zone0
+uses count: 0
+uses limit: 100
+write file count: 0
+write file limit: 10
+write byte count: 0
+write byte limit: 0
+expire time: 2018-06-25.18:00:00
+data-object name: hello1.txt
+data collection: /zone0/home/admin
+No host restrictions
+restricted-to user: yao
+No group restrictions
+
+su - yao
+
+iget /zone0/home/admin/hello1.txt -t Sja0aRiE2FKIWHk 
+
+

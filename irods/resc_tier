@@ -1,0 +1,33 @@
+iadmin mkresc resc1 unixfilesystem irods:/var/lib/irods/Vault/primary
+iadmin mkresc resc2 unixfilesystem irods:/var/lib/irods/Vault/archive
+
+ilsresc
+resc1:unixfilesystem
+resc2:unixfilesystem
+
+echo hello > /var/lib/irods/Vault/primary/home/admin/hello2.txt
+
+iscan -r /var/lib/irods/Vault/primary
+/var/lib/irods/Vault/primary/home/admin/hello2.txt is not registered in iRODS
+
+
+ireg -C /var/lib/irods/Vault/primary/home/admin /zone0/home/admin -f -R resc0
+
+ils -l
+/zone0/home/admin:
+  admin             0 resc1           12 2018-06-20.16:50 & hello2.txt
+
+
+irepl -R resc2 -S resc1 hello2.txt
+
+ils -l
+/zone0/home/admin:
+  admin             0 resc1           12 2018-06-20.16:50 & hello2.txt
+  admin             1 resc2           12 2018-06-20.16:50 & hello2.txt
+
+itrim -S resc1 --age 1440 hello1.txt
+ils -l
+/zone0/home/admin:
+  admin             1 resc2            6 2018-06-20.14:31 & hello2.txt
+
+
