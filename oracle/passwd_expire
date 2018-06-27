@@ -1,0 +1,4 @@
+alter profile DEFAULT limit PASSWORD_REUSE_TIME unlimited;
+alter profile DEFAULT limit PASSWORD_LIFE_TIME  unlimited;
+alter user system identified by Huawei123;
+select substr(username,1,6), account_status, EXPIRY_DATE from dba_users where username='SYSTEM';

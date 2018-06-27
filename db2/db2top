@@ -1,0 +1,4 @@
+db2top -d hwdb -b d -i 60 -s 1440 -o database.log &
+db2top -d hwdb -b t -i 60 -s 1440 -o tablespace.log &
+db2top -d hwdb -b T -i 60 -s 1440 -o table.log &
+db2top -d hwdb -b b -i 60 -s 1440 -o bufferpool.log &

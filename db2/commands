@@ -1,0 +1,84 @@
+db2instance -list
+
+db2cluster -cm -list -alert
+
+db2cluster -cfs -list -filesystem
+
+select name,substr(value,1,100)from sysibmadm.dbcfg
+
+select substr(TBSP_NAME,1,30),TBSP_ID,TOTAL_PAGES from sysibmadm.container_utilization
+
+
+-- tablespace views:
+SYSCAT.TABLESPACES
+SYSIBMADM.TBSP_UTILIZATION
+SYSIBMADM.SNAPTBSP
+SYSIBMADM.SNAPTBSP_PART
+
+-- container views:
+SYSIBMADM.CONTAINER_UTILIZATION
+SYSIBMADM.SNAPCONTAINER
+MON_GET_CONTAINER('',-2)
+
+--- tablespace config:
+db2 "select substr(tbspace,1,30) tbspace, substr(owner,1,30) owner,tbspaceid,tbspacetype,datatype,extentsize,prefetchsize,overhead,transferrate,pagesize,bufferpoolid from syscat.tablespaces"
+
+
+-- tablespace utilization
+db2 "select TBSP_ID,substr(TBSP_NAME,1,30) name, TBSP_TYPE,TBSP_CONTENT_TYPE,substr(TBSP_STATE,1,30) state,TBSP_TOTAL_PAGES,TBSP_USABLE_PAGES,TBSP_USED_PAGES,TBSP_FREE_PAGES,TBSP_PAGE_SIZE,TBSP_EXTENT_SIZE,TBSP_PREFETCH_SIZE,TBSP_USING_AUTO_STORAGE,TBSP_AUTO_RESIZE_ENABLED,substr(DBPGNAME,1,10) DBPGNAME,TBSP_NUM_CONTAINERS,DBPARTITIONNUM  from SYSIBMADM.TBSP_UTILIZATION"
+
+
+-- Global variable
+db2greg -dump
+
+-- Check versions
+db2level
+
+db2cli
+
+-- Add database to configuration file
+db2cli writecfg add -dsn hwdb -database hwdb -host db2inst1 -port 60000
+
+-- check configuration file
+db2cli validate -dsn hwdb
+
+db2greg -getinstrec instancename='db2inst1'
+
+db2greg -updinstrec instancename='db2inst1'!startatboot=1
+
+db2iauto -on db2inst1
+
+list database directory
+
+LIST DATABASE PARTITION GROUPS SHOW DETAIL
+
+
+-- Table Space
+
+SELECT * from table (MON_GET_REBALANCE_STATUS('',-1))
+
+SELECT varchar(tbsp_name, 30) as tsname, reclaimable_space_enabled,tbsp_free_pages,tbsp_page_top,tbsp_usable_pages FROM TABLE(MON_GET_TABLESPACE('',-2)) AS t ORDER BY tbsp_free_pages
+
+SELECT varchar(TBSP_NAME,20) tbsname ,TBSP_CONTENT_TYPE,varchar(STORAGE_GROUP_NAME,20) sgname from table (MON_GET_TABLESPACE('',-2)) WHERE TBSP_USING_AUTO_STORAGE = 1
+
+
+-- Table
+
+select varchar(TABNAME,20),varchar(OWNER,20),TYPE,STATUS from SYSCAT.TABLES where owner = 'DB2INST1'
+
+SELECT * FROM TABLE(SYSPROC.ADMIN_GET_TAB_COMPRESS_INFO(’SAMPLE1’, ’T1’))
+
+
+-- Event Monitor
+CREATE EVENT MONITOR testevmon FOR CONNECTIONS WRITE TO FILE 
+SET EVENT MONITOR testevmon STATE 1
+
+SELECT EVMONNAME, NODENUM, MONSCOPE FROM SYSCAT.EVENTMONITORS
+
+
+-- Storage Group
+
+select varchar(sgname,20) sgname, sgid, varchar(owner,10) owner, datatag, cachingtier, DEFAULTSG, OVERHEAD, DEVICEREADRATE, WRITEOVERHEAD, DEVICEWRITERATE from SYSCAT.STOGROUPS
+
+select varchar(STORAGE_GROUP_NAME,20) sgname, STORAGE_GROUP_ID id, varchar(DB_STORAGE_PATH,40), DB_STORAGE_PATH_WITH_DPE, DB_STORAGE_PATH_ID, FS_ID, FS_TOTAL_SIZE, FS_USED_SIZE from TABLE(ADMIN_GET_STORAGE_PATHS('',-1))
+

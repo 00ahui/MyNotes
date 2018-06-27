@@ -1,0 +1,35 @@
+db2pd
+
+db2pd -reorgs index -db hwdb
+
+db2pd -db hwdb -transactions
+
+db2pd -db hwdb -locks
+db2pd -db hwdb -wlocks
+
+db2pd -db hwdb -applications
+db2pd -db hwdb -apinfo 5513
+
+
+-- dynamic cache/sql
+db2pd -db hwdb -dynamic
+
+-- memory
+db2pd -memblock
+
+
+-- table statistics
+db2pd -db hwdb -tcbstats
+
+db2pd -agent
+
+db2pd -db hwdb -tablespaces
+
+db2pd -db hwdb -recovery
+
+db2pd -db hwdb -logs
+
+-- nodes
+db2pd -dbptnmem
+
+

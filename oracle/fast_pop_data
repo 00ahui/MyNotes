@@ -1,0 +1,15 @@
+create smallfile tablespace bkts datafile '+WYH/bkts01' size 10G, '+WYH/bkts02' size 10G;
+
+create table userinfo ( id number, name varchar(30), info varchar(128)) tablespace bkts;
+
+-- each loop 120MB
+exec for i in 0..99 loop insert into userinfo select i*1000000+level, 'user_' || to_char(i*1000000+level), 'info_' || to_char(i*1000000+level) || '_fjds329ap43fid3saf321dsaf213hnh12duwq90r4329rfesakjv321ni1dsh3a1iu2f1he3h'  from dual connect by level <= 1000000; commit; end loop;
+
+create unique index pk_userinfo_id on userinfo(id) nologging tablespace bkts;
+create index idx_userinfo_name on userinfo(name) nologging tablespace bkts;
+
+set linesize 160
+col name for a20
+col info for a100
+select * from userinfo where id=1000001;
+

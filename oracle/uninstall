@@ -1,3 +1,6 @@
+
+-- uninstall oracle 12c
+
 su - oracle
 su root
 cd /tmp # avoid wrong operation

@@ -1,0 +1,28 @@
+Collecting a vSCSI Trace
+
+To collect a trace from an application's I/O workload using the vscsiStats utility on an ESX/ESXi host, follow
+these steps:
+
+1 Reset the statistics by typing in an ESX/ESXi shell:
+vscsiStats -r
+
+2 Start collecting statistics and create a unique ID for them:
+vscsiStats -s -t -w <worldId> -i <handleId>
+
+(where <worldId> is the world ID for the virtual machine in which you will be running the workload and
+<handleId> is the identifier for the specific virtual disk you will be testing).
+
+3 Using the unique ID generated in the previous step, configure ESX/ESXi to capture the statistics in a disk
+file:
+logchannellogger <unique-id> <temporary-file-name>
+
+4 Run your application within the virtual machine identified by <worldId>.
+
+5 After the application run is completed (or the trace collection is over) return to the ESX/ESXi shell and stop
+the logchannellogger process by typing <Ctrl>-C.
+
+6 Stop the statistics collection:
+vscsiStats -x -w <worldId> -i <handleId>
+
+7 Convert the binary trace file to a .csv file:
+vscsiStats -e <temporary-file-name> > <trace-file-name.csv>

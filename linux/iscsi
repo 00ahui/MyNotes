@@ -1,0 +1,12 @@
+
+yum install iscsi-initiator-utils
+
+iscsiadm -m discovery -t sendtargets -p 192.168.1.88
+iscsiadm -m discovery -t sendtargets -p 192.168.1.89
+
+iscsiadm -m node -L all
+
+-- log out
+
+iscsiadm -m node -U all
+

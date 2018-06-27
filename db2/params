@@ -1,0 +1,13 @@
+-- Optimize insert speed
+ Number of asynchronous page cleaners   (NUM_IOCLEANERS) = AUTOMATIC(16)
+ Log buffer size (4KB)                        (LOGBUFSZ) = 16384
+ Changed pages threshold                (CHNGPGS_THRESH) = 5
+
+-- Optimize batch speed
+DBM：
+ Maximum query degree of parallelism   (MAX_QUERYDEGREE) = 128
+ Enable intra-partition parallelism     (INTRA_PARALLEL) = YES
+DB：
+ Degree of parallelism                      (DFT_DEGREE) = 128
+ Number of I/O servers                   (NUM_IOSERVERS) = 128
+

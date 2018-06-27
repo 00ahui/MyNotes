@@ -1,0 +1,12 @@
+lvchange -ay /dev/vgopt/lvol0
+mount -a
+
+su - oracle
+sqlplus / as sysdba
+startup
+
+lsnrctl start ESIGHTLISTENER
+
+su - ossuser
+cd /opt/eSight/bin
+sh startup.sh

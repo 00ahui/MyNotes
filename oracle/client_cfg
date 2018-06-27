@@ -1,0 +1,29 @@
+1. Goto Oracle Instant Client 32 bit Download Page: http://www.oracle.com/technetwork/topics/winsoft-085727.html
+
+2. Download the following packages
+
+instantclient-basic-nt-12.1.0.2.0.zip
+instantclient-sqlplus-nt-12.1.0.2.0.zip
+instantclient-odbc-nt-12.1.0.2.0.zip
+
+3. Extract the packages content to the same directory, e.g. D:\instantclient_12_nt
+
+4. Set enviorment variable ORACLE_HOME to "D:\instantclient_12_nt", and add %ORACLE_HOME% to PATH
+
+5. Create service name file "D:\instantclient_12_nt\NETWORK\ADMIN\tnsnames.ora"
+
+e.g.:
+
+ORADB =
+  (DESCRIPTION =
+    (ADDRESS = (PROTOCOL = TCP)(HOST = 100.124.142.21)(PORT = 1522))
+    (CONNECT_DATA =
+      (SERVER = DEDICATED)
+      (SERVICE_NAME = oradb)
+    )
+  )
+
+6. Execute "D:\instantclient_12_nt\odbc_install.exe" to install ODBC
+
+7. Execute "c:\Windows\SysWOW64\odbcad32.exe", add User DSN, select driver "Oracle in instantclient_12_nt", set Data Source Name, select TNS Service Name, set User ID
+
