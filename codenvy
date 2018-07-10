@@ -1,0 +1,5 @@
+-- maven build without test
+mvn clean install -f ${current.project.path} -Dmaven.test.skip=true
+
+-- java run
+java -classpath ${project.java.classpath}${project.java.output.dir} ${current.class.fqn}
