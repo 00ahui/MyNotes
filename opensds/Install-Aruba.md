@@ -1,10 +1,10 @@
 
 Requirments:
 
-opensds-1
-- VM: m2.large (2U8G)
-- OS: ubuntu 16.04
-- Disk: >30GB
+    opensds-1
+        - VM: m2.large (2U8G)
+        - OS: ubuntu 16.04
+        - Disk: >30GB
 
 
 Install dependency:
