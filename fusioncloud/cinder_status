@@ -1,0 +1,20 @@
+ssh fsp@<cps_ip>  IaaS@OS-CLOUD9!
+
+su - root   IaaS@OS-CLOUD8!
+
+. set_env
+
+(1)OpenStack enviorment
+Password: FusionSphere123
+
+cinder reset-state --state error_deleting b941b643-7772-41c3-a60b-66bf361ca3e8
+cinder reset-state --state error b941b643-7772-41c3-a60b-66bf361ca3e8
+
+su - gaussdba
+
+gsql -d cinder -W FusionSphere123
+
+update volumes set status='error_extending' where id='cf950031-20c2-42c5-9ebc-b77e70ab3f06';
+update volumes set status='error_rollbacking' where id='b941b643-7772-41c3-a60b-66bf361ca3e8';
+
+
