@@ -7,7 +7,7 @@
 Apply an EC2 instance with the following specs :
 - VM: m2.large (2U8G)
 - OS: ubuntu 16.04
-- Disk: 8GB
+- Disk: OS: 8GB gp2, Data: 8GB magnet
 
 Configure /etc/hosts:
 
@@ -95,7 +95,7 @@ mysql -e "update services set deleted = 1 where host like 'openstack-1@lvmdriver
 
 ### Create a custom LVM cinder backend
 
-Create volume group:
+Create volume group on the data disk:
 
 ```shell
 sudo pvcreate /dev/xvdb1
@@ -232,4 +232,5 @@ Delete volume:
 
 ```shell
 osdsctl volume delete ae87d5a5-0314-46a4-9df5-13d32d604578
+osdsctl volume list
 ```
