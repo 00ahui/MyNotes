@@ -30,7 +30,9 @@ sudo apt update
 sudo apt install make git gcc python sysstat -y
 ```
 
-Setup openstack using devstack: https://docs.openstack.org/devstack/latest/
+Setup openstack using devstack: 
+
+https://docs.openstack.org/devstack/latest/
 
 
 ### Test cinder
@@ -38,8 +40,7 @@ Setup openstack using devstack: https://docs.openstack.org/devstack/latest/
 Import enviorment variables:
 
 ```shell
-cd devstack
-source openrc
+source /opt/stack/devstack/openrc admin admin
 ```
 
 List volume type:
@@ -66,223 +67,169 @@ Delete the volume:
 cinder delete e13d9db6-0ea5-42bf-adaa-2f52b642c340
 ```
 
-## Install Ceph
+## Create custom cinder backends
 
-### Prepare 1 VM
+### Delete default LVM backend
 
-Apply an EC2 instance with the following specs :
-- VM: m2.large (2U8G)
-- OS: ubuntu 16.04
-- Disk: /dev/xvda 8GB gp1, /dev/xvdb 100GB magnet
-
-Configure /etc/hosts:
+Delete default volume-type:
 
 ```shell
-172.31.39.170 ceph-1
+cinder type-list
+cinder type-delete 6adf8fb4-cccf-4846-b13e-c654656cc4b7
 ```
 
-Configure /etc/hostname:
+Disalbe default backend:
 
 ```shell
-ceph-1
+cinder service-list
+cinder service-disable openstack-1@lvmdriver-1 cinder-volume
 ```
 
-### Install Ceph on ceph-1
 
-Install dependency:
+Delete backend in cinder database:
 
 ```shell
-sudo apt update
-sudo apt install make git gcc python python-pip sysstat -y
+sudo su - stack
+mysql -e "update services set deleted = 1 where host like 'openstack-1@lvmdriver-1' and disabled = 1 " cinder
 ```
-    
-Install ansible:
+
+### Create a custom LVM cinder backend
+
+Create volume group:
 
 ```shell
-sudo add-apt-repository ppa:ansible/ansible
-sudo apt update
-sudo apt install ansible
+sudo pvcreate /dev/xvdb1
+sudo vgcreate vg1 /dev/xvdb1
 ```
 
-Clone repository:
-
-```shell
-sudo su - root
-git clone https://github.com/ceph/ceph-ansible.git
-```
-
-Prepare requirements:
-
-```shell
-cd ceph-ansible
-pip install -r requirements.txt
-```
-
-Edit group_vars/all.yml
-
-```shell
-ceph_origin: repository
-ceph_repository: community
-ceph_stable_release: luminous
-public_network: "172.31.32.0/20"
-cluster_network: "{{ public_network }}"
-monitor_interface: eth0
-devices:
-    - '/dev/xvdb'
-osd_scenario: collocated
-```
-
-Edit local.hosts
-
-```shell
-[mons]
-localhost ansible_connection=local
-
-[osds]
-localhost ansible_connection=local
-
-[mgrs]
-localhost ansible_connection=local
-```
-
-Run ansible-playbook:
-
-```shell
-cp site.yml.sample site.yml
-ansible-playbook site.yml -i local.hosts
-```
-
-### Test Ceph
-
-Create a ceph pool:
-
-```shell
-ceph osd pool create pool1 64
-```
-Show the pool details:
-
-```shell
-ceph osd pool ls detail
-```
-
-## Configure Ceph as cinder backend
-
-### Prepare configuration file
-
-Configure /etc/hosts for both openstack-1 and ceph-1:
-
-```shell
-172.31.36.154 openstack-1 
-172.31.39.170 ceph-1
-```
-
-Copy EC2 KeyPair.pem to both hosts, change the permission of the file:
-
-```shell
-chmod 0400 KeyPair.pem
-```
-
-On openstack-1, copy /etc/ceph/ceph.conf from ceph-1:
-
-```shell
-sudo mkdir /etc/ceph
-ssh -i KeyPair.pem ceph-1 cat /etc/ceph/ceph.conf | sudo tee /etc/ceph/ceph.conf
-```
-
-On ceph-1 create pools
-
-```shell
-sudo su - root
-ceph osd pool create volumes 64
-ceph osd pool create vms 64
-ceph osd pool create images 64
-
-rbd pool init volumes
-rbd pool init vms
-rbd pool init images
-```
-
-On ceph-1 set the cinder authentication
-
-```shell
-#ceph auth get-or-create client.cinder mon 'allow r' osd 'allow class-read object_prefix rbd_children, allow rwx pool=volumes, allow rwx pool=vms, allow rwx pool=images'
-ceph auth get-or-create client.cinder mon 'profile rbd' osd 'profile rbd pool=volumes, profile rbd pool=vms, profile rbd-read-only pool=images'
-```
-
-On openstack-1, connect ceph-1 to generate authentication key and save it to /etc/ceph/ceph.client.cinder.keyring
-
-```shell
-ssh -i KeyPair.pem ceph-1 sudo ceph auth get-or-create client.cinder | sudo tee /etc/ceph/ceph.client.cinder.keyring
-sudo chown stack:stack /etc/ceph/ceph.client.cinder.keyring
-```
-
-### Configure cinder backend on openstack-1
-
-Install ceph packages :
-
-```shell
-sudo apt-get install ceph-common python-rbd
-```
-
-Edit /etc/cinder/cinder.conf :
+Edit /etc/cinder/cinder.conf
 
 ```shell
 [DEFAULT]
 default_volume_type = lvm
-enabled_backends = lvm,ceph
+enabled_backends = vg1
 
-[lvm]
+[vg1]
 image_volume_cache_enabled = True
 volume_clear = zero
 lvm_type = auto
 target_helper = tgtadm
-create a volume group: vgstack-1
-volume_group = vgstack-1
+volume_group = vg1
 volume_driver = cinder.volume.drivers.lvm.LVMVolumeDriver
-volume_backend_name = lvm
-glance_api_version = 2
-
-[ceph]
-volume_driver = cinder.volume.drivers.rbd.RBDDriver
-volume_backend_name = ceph
-rbd_pool = volumes
-rbd_ceph_conf = /etc/ceph/ceph.conf
-rbd_flatten_volume_from_snapshot = false
-rbd_max_clone_depth = 5
-rbd_store_chunk_size = 4
-rados_connect_timeout = -1
-rbd_user = cinder
-rbd_secret_uuid = 3117e7a5-a38d-4770-87c8-e35fe1f7af77
+volume_backend_name = vg1
 ```
 
-Restart cinder-volume:
+
+Restart cinder-volume service:
 
 ```shell
 sudo systemctl restart devstack@c-vol.service
+cinder service-list
 ```
 
-Import admin enviorment variables:
+### Test the backend
 
-```shell
-source /opt/stack/devstack/openrc admin admin
-```
-List backends:
-
-```shell
-cinder service-list    
-```
-
-Create volume type:
+Create volume-type:
 
 ```shell
 cinder type-create lvm
-cinder type-key ceph set volume_backend_name=lvm
-cinder type-create ceph
-cinder type-key ceph set volume_backend_name=ceph
+cinder type-key lvm set volume_backend_name=vg1
 cinder extra-specs-list
+```
 
+Test volume-type:
+
+```shell
+cinder create 1 --name lvm001
+cinder list
+cinder delete lvm001
+```
+
+Show cinder pool (will use in OpenSDS):
+
+```shell
+cinder get-pools
+```
+ 
+
+## Use cinder as the backend of OpenSDS
+
+### Configure OpenSDS
+
+Logoin to opensds-1
+
+Edit /etc/opensds/opensds.conf :
+
+```shell
+[cinder]
+name = cinder
+description = Cinder Test
+driver_name = cinder
+config_path = /etc/opensds/driver/cinder.yaml
+
+[osdsdock]
+enabled_backends = lvm,cinder
+```
+
+Edit /etc/opensds/driver/cinder.yaml :
+
+```shell
+authOptions:
+  endpoint: "http://172.31.36.154/identity"
+  domainName: "Default"
+  username: "admin"
+  password: "secret"
+  tenantName: "admin"
+pool:
+  openstack-1@vg1#vg1:
+    storageType: block
+    availabilityZone: az1
+    extras:
+      dataStorage:
+        provisioningPolicy: Thin
+        isSpaceEfficient: false
+      ioConnectivity:
+        accessProtocol: iscsi
+        maxIOPS: 7000000
+        maxBWS: 600
+      advanced:
+        diskType: SSD
+        latency: 3ms
+```
+
+Restart opensds to enable cinder backend:
+
+```shell
+sudo su - root
+opensds-stop
+opensds-start
+opensds-status
+```
+
+### Test cinder backend
+
+Show cinder pools:
+
+```shell
+source /opt/stack/devstack/openrc admin admin
+osdsctl pool list
 ```
 
 Create volume:
 
-    cinder create 1 --name volume001 --volume_type ceph
+```shell
+osdsctl volume create 1 -n vol3 -a az1
+osdsctl volume list
+```
+
+Login to openstack-1, check the cinder volume
+```shell
+source /opt/stack/devstack/openrc admin admin
+cinder list
+```
+
+Delete volume:
+
+```shell
+osdsctl volume delete ae87d5a5-0314-46a4-9df5-13d32d604578
+```

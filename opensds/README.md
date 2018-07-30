@@ -291,6 +291,44 @@ Create replication:
     osdsctl replication list
 ```
 
+
+# Install dashboard
+
+### Install dependicy & build dashboard
+ 
+https://github.com/opensds/opensds/tree/master/dashboard
+
+### Configure ngnix and start dashboard
+
+Edit  /etc/nginx/sites-available/default
+
+```shell
+server {
+        listen 8088 default_server;
+        listen [::]:8088 default_server;
+        root /var/www/html;
+        server_name OpenSDS;
+                location /v3/ {
+                proxy_pass http://172.31.10.16/identity/v3/;
+        }
+
+        location /v1beta/ {
+                proxy_pass http://172.31.10.16:50040/v1beta/;
+        }
+}
+```
+
+Restart ngnix:
+
+```shell
+systemctl restart nginx
+systemctl status nginx
+```
+
+Visit http://<dashboard_public_ip>:8088, login as admin, default password is opensds@123
+
+
+
 # Use different backend storages
 
 
