@@ -1,6 +1,6 @@
-# Install OpenSDS and test host replication
+# Install OpenSDS with host replication
 
-## Install OpenSDS on two nodes
+## Install OpenSDS
 
 ### Prepare two VMs
 
@@ -290,3 +290,20 @@ Create replication:
     osdsctl replication create 1a354244-dae6-4a5c-8464-8a105d318c17 c2bf2063-229b-4665-acc5-9761029bf6a4
     osdsctl replication list
 ```
+
+## Further steps
+
+### Use cinder as backend storage
+
+https://github.com/00ahui/MyNotes/blob/master/opensds/use-cinder-backend.md
+
+
+### Integrate with Kubernetes
+
+https://github.com/00ahui/MyNotes/blob/master/opensds/integrate-kubernetes.md
+
+
+### Integrate with Openstack
+
+https://github.com/00ahui/MyNotes/blob/master/opensds/integrate-openstack.md
+
