@@ -1,4 +1,4 @@
-# Use cinder as OpenSDS backend storage
+# Use LVM as OpenSDS backend storage
 
 ### Create volume group
 
