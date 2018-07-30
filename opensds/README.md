@@ -291,36 +291,38 @@ Create replication:
     osdsctl replication list
 ```
 
-## Sourth bond storage
+# Use different backend storages
 
-### Use LVM as backend storage
+
+## Use LVM as backend storage
 
 https://github.com/00ahui/MyNotes/blob/master/opensds/use-lvm-backend.md
 
 
-### Use cinder as backend storage
+## Use cinder as backend storage
 
 https://github.com/00ahui/MyNotes/blob/master/opensds/use-cinder-backend.md
 
 
-### Use ceph as backend storage
+## Use ceph as backend storage
 
 https://github.com/00ahui/MyNotes/blob/master/opensds/use-ceph-backend.md
 
 
-### Use Huawei Dorado as backend storage
+## Use Huawei Dorado as backend storage
 
 https://github.com/00ahui/MyNotes/blob/master/opensds/use-dorado-backend.md
 
 
-## North bond platform
+# Integrate with different platforms
 
-### Integrate with Kubernetes
+
+## Integrate with Kubernetes
 
 https://github.com/00ahui/MyNotes/blob/master/opensds/integrate-kubernetes.md
 
 
-### Integrate with Openstack
+## Integrate with Openstack
 
 https://github.com/00ahui/MyNotes/blob/master/opensds/integrate-openstack.md
 
