@@ -1,4 +1,6 @@
-# Install openstack
+# Use cinder as OpenSDS backend storage
+
+## Install openstack using devstack
 
 ### Prepare 1 VM
 
@@ -64,7 +66,7 @@ Delete the volume:
 cinder delete e13d9db6-0ea5-42bf-adaa-2f52b642c340
 ```
 
-# Install Ceph
+## Install Ceph
 
 ### Prepare 1 VM
 
@@ -163,7 +165,7 @@ Show the pool details:
 ceph osd pool ls detail
 ```
 
-# Configure Ceph as cinder backend
+## Configure Ceph as cinder backend
 
 ### Prepare configuration file
 
