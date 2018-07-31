@@ -351,7 +351,7 @@ Install Golang:
 wget https://storage.googleapis.com/golang/go1.9.2.linux-amd64.tar.gz
 sudo tar -C /usr/local -xzf go1.9.2.linux-amd64.tar.gz
 echo 'export PATH=$PATH:/usr/local/go/bin' | sudo tee -a /etc/profile
-echo "export GOPATH=$HOME/gopath" | sudo tee -a /etc/profile
+echo 'export GOPATH=$HOME/gopath' | sudo tee -a /etc/profile
 source /etc/profile
 go version
 ```
@@ -373,12 +373,13 @@ wget https://github.com/coreos/etcd/releases/download/v3.3.0/etcd-v3.3.0-linux-a
 tar -xzf etcd-v3.3.0-linux-amd64.tar.gz
 cd etcd-v3.3.0-linux-amd64
 sudo cp -f etcd etcdctl /usr/local/bin/
-cd $HOME
 ```
 
 Build kubernete (very long time):
 
 ```shell
+sudo su - root
+cd /opt
 git clone https://github.com/kubernetes/kubernetes.git
 cd kubernetes
 git checkout v1.10.0
@@ -388,7 +389,7 @@ make
 Run kubernetes:
 
 ```shell
-echo alias kubectl="$HOME/kubernetes/cluster/kubectl.sh" | sudo tee -a /etc/profile
+echo alias kubectl='/opt/kubernetes/cluster/kubectl.sh' | sudo tee -a /etc/profile
 source /etc/profile
 
 ALLOW_PRIVILEGED=true \
@@ -467,7 +468,7 @@ https://github.com/00ahui/MyNotes/blob/master/opensds/use-dorado-backend.md
 https://github.com/00ahui/MyNotes/blob/master/opensds/integrate-kubernetes.md
 
 
-## Integrate with Openstack
+## Integrate with Openstack (expose cinder API)
 
-https://github.com/00ahui/MyNotes/blob/master/opensds/integrate-openstack.md
+https://github.com/00ahui/MyNotes/blob/master/opensds/expose-cinder-api.md
 
