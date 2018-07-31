@@ -1,3 +1,4 @@
+# Use ceph as OpenSDS backend storage
 
 ## Install Ceph
 
@@ -90,7 +91,8 @@ ansible-playbook site.yml -i local.hosts
 Create a ceph pool:
 
 ```shell
-ceph osd pool create pool1 64
+ceph osd pool create volumes 64
+rbd pool init volumes
 ```
 Show the pool details:
 
@@ -98,16 +100,18 @@ Show the pool details:
 ceph osd pool ls detail
 ```
 
-## Configure Ceph as cinder backend
 
-### Prepare configuration file
+## Use ceph as OpenSDS backend
 
-Configure /etc/hosts for both openstack-1 and ceph-1:
+
+### Install packages on opensds-1
 
 ```shell
-172.31.36.154 openstack-1 
-172.31.39.170 ceph-1
+sudo apt-get install python-rbd ceph-common
 ```
+
+
+### Create ceph configuration file on opensds-1
 
 Copy EC2 KeyPair.pem to both hosts, change the permission of the file:
 
@@ -115,93 +119,92 @@ Copy EC2 KeyPair.pem to both hosts, change the permission of the file:
 chmod 0400 KeyPair.pem
 ```
 
-On openstack-1, copy /etc/ceph/ceph.conf from ceph-1:
+On opensds-1, copy /etc/ceph/ceph.conf from ceph-1:
 
 ```shell
 sudo mkdir /etc/ceph
 ssh -i KeyPair.pem ceph-1 cat /etc/ceph/ceph.conf | sudo tee /etc/ceph/ceph.conf
 ```
 
-On ceph-1 create pools
+On opensds-1, connect ceph-1 to get admin authentication key and save it to /etc/ceph/ceph.client.admin.keyring
+
+```shell
+ssh -i KeyPair.pem ceph-1 sudo ceph auth get-or-create client.admin | sudo tee /etc/ceph/ceph.client.admin.keyring
+```
+
+
+### Configure ceph as backend
+
+Edit  /etc/opensds/opensds.conf
+
+```shell
+[osdsdock]
+enabled_backends = ceph
+
+[ceph]
+name = ceph
+description = Ceph Driver
+driver_name = ceph
+config_path = /etc/opensds/driver/ceph.yaml
+```
+
+Edit /etc/opensds/driver/ceph.yaml
+
+```shell
+configFile: /etc/ceph/ceph.conf
+pool:
+  volumes: # ceph pool name
+    storageType: block
+    availabilityZone: az2
+    extras:
+      dataStorage:
+        provisioningPolicy: Thin
+        isSpaceEfficient: true
+      ioConnectivity:
+        accessProtocol: volumes # ceph pool name
+        maxIOPS: 6000000
+        maxBWS: 500
+      advanced:
+        diskType: SSD
+        latency: 5ms
+```
+
+Restart OpenSDS:
 
 ```shell
 sudo su - root
-ceph osd pool create volumes 64
-ceph osd pool create vms 64
-ceph osd pool create images 64
-
-rbd pool init volumes
-rbd pool init vms
-rbd pool init images
+opensds-stop
+opensds-start
+opensds-status
 ```
 
-On ceph-1 set the cinder authentication
+### Test ceph backend
 
-```shell
-#ceph auth get-or-create client.cinder mon 'allow r' osd 'allow class-read object_prefix rbd_children, allow rwx pool=volumes, allow rwx pool=vms, allow rwx pool=images'
-ceph auth get-or-create client.cinder mon 'profile rbd' osd 'profile rbd pool=volumes, profile rbd pool=vms, profile rbd-read-only pool=images'
-```
-
-On openstack-1, connect ceph-1 to generate authentication key and save it to /etc/ceph/ceph.client.cinder.keyring
-
-```shell
-ssh -i KeyPair.pem ceph-1 sudo ceph auth get-or-create client.cinder | sudo tee /etc/ceph/ceph.client.cinder.keyring
-sudo chown stack:stack /etc/ceph/ceph.client.cinder.keyring
-```
-
-### Configure cinder backend on openstack-1
-
-Install ceph packages :
-
-```shell
-sudo apt-get install ceph-common python-rbd
-```
-
-Edit /etc/cinder/cinder.conf :
-
-```shell
-[DEFAULT]
-default_volume_type = ceph
-enabled_backends = rbd
-
-[rbd]
-volume_driver = cinder.volume.drivers.rbd.RBDDriver
-volume_backend_name = rbd
-rbd_pool = volumes
-rbd_ceph_conf = /etc/ceph/ceph.conf
-rbd_flatten_volume_from_snapshot = false
-rbd_max_clone_depth = 5
-rbd_store_chunk_size = 4
-rados_connect_timeout = -1
-rbd_user = cinder
-rbd_secret_uuid = 3117e7a5-a38d-4770-87c8-e35fe1f7af77
-```
-
-Restart cinder-volume:
-
-```shell
-sudo systemctl restart devstack@c-vol.service
-```
-
-Import admin enviorment variables:
+Show ceph pools:
 
 ```shell
 source /opt/stack/devstack/openrc admin admin
-```
-List backends:
-
-```shell
-cinder service-list    
+osdsctl pool list
 ```
 
-Create volume type:
-
-```shell
-cinder type-create ceph
-cinder type-key ceph set volume_backend_name=ceph
-cinder extra-specs-list
-```
 
 Create volume:
 
-    cinder create 1 --name volume001 --volume_type ceph
+```shell
+osdsctl volume create 1 -n vol4 -a az2
+osdsctl volume list
+```
+
+Check ceph volume
+```shell
+rbd ls volumes 
+```
+
+Delete volume:
+
+```shell
+osdsctl volume delete ae87d5a5-0314-46a4-9df5-13d32d604578
+osdsctl volume list
+```
+
+
