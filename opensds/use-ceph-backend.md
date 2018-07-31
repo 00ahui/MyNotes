@@ -87,7 +87,7 @@ ansible-playbook site.yml -i local.hosts
 ```
 
 
-Configure tprofile and disable some features in ceph for kernel compatible.
+Configure crush tunable profile and disable some features in ceph for kernel compatible.
 
 ```shell
 ceph osd crush tunables hammer  # set crush tunables profile to hammer
