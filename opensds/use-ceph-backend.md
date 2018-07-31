@@ -86,14 +86,25 @@ cp site.yml.sample site.yml
 ansible-playbook site.yml -i local.hosts
 ```
 
+
+Configure tprofile and disable some features in ceph for kernel compatible.
+
+```shell
+ceph osd crush tunables hammer  # set crush tunables profile to hammer
+grep -q "^rbd default features" /etc/ceph/ceph.conf || sed -i '/\[global\]/rbd default features = 1' /etc/ceph/ceph.conf  # 1: Layering support
+```
+
+
 ### Test Ceph
 
 Create a ceph pool:
 
 ```shell
-ceph osd pool create pool0 128
-rbd pool init pool0
+ceph osd pool create pool0 100
+ceph osd pool set pool0 size 1   # only 1 copy, just for test
 ```
+
+
 Show the pool details:
 
 ```shell
@@ -103,30 +114,22 @@ ceph osd pool ls detail
 
 ## Use ceph as OpenSDS backend
 
-
-### Install packages on opensds-1
+### Install packages
 
 ```shell
 sudo apt-get install python-rbd ceph-common
 ```
 
+### Create configuration file
 
-### Create ceph configuration file on opensds-1
-
-Copy EC2 KeyPair.pem to both hosts, change the permission of the file:
-
-```shell
-chmod 0400 KeyPair.pem
-```
-
-On opensds-1, copy /etc/ceph/ceph.conf from ceph-1:
+Copy /etc/ceph/ceph.conf from ceph-1:
 
 ```shell
 sudo mkdir /etc/ceph
 ssh -i KeyPair.pem ceph-1 cat /etc/ceph/ceph.conf | sudo tee /etc/ceph/ceph.conf
 ```
 
-On opensds-1, connect ceph-1 to get admin authentication key and save it to /etc/ceph/ceph.client.admin.keyring
+Copy admin authentication key from ceph-1:
 
 ```shell
 ssh -i KeyPair.pem ceph-1 sudo ceph auth get-or-create client.admin | sudo tee /etc/ceph/ceph.client.admin.keyring
@@ -196,7 +199,7 @@ osdsctl volume list
 
 Check ceph volume
 ```shell
-rbd ls volumes 
+rbd ls pool0 
 ```
 
 Delete volume:
