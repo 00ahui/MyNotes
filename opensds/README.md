@@ -401,7 +401,26 @@ hack/local-up-cluster.sh
 
 ### OpenSDS Deployment
 
+Installation:
+
 https://github.com/opensds/opensds/wiki/OpenSDS-Cluster-Installation-through-Ansible
+
+
+Re-run after reboot:
+
+```shell
+sudo su - root
+
+etcd --advertise-client-urls http://127.0.0.1:2379 \
+   --listen-client-urls http://127.0.0.1:2379 \
+   --listen-peer-urls http://127.0.0.1:2380 \
+   --data-dir /opt/opensds/etcd/data \
+   --debug >> /var/log/opensds/etcd.log 2>&1 &
+
+osdslet &
+
+osdsdock &
+```
 
 
 ### Test OpenSDS
