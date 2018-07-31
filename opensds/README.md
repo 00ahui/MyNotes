@@ -2,7 +2,7 @@
 
 https://github.com/opensds/opensds/wiki/OpenSDS-Cluster-Installation-through-Ansible
 
-Note: 
+### Note
 Simplest way, but hard to understand
 Please review opensds-installer/ansible/roles/<roles>/scenarios for the details steps
 
