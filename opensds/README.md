@@ -5,7 +5,7 @@
 ### Prepare two VMs
 
 Apply two EC2 instances with the following specs :
-- VM: m2.large (2U8G)
+- VM: t2.large (2U8G)
 - OS: ubuntu 16.04
 - Disk: 8GB
 
@@ -334,7 +334,7 @@ Visit http://<dashboard_public_ip>:8088, login as admin, default password is ope
 ### Prepare VM
 
 Apply EC2 instances with the following specs :
-- VM: m4.xlarge (4U16G)
+- VM: t2.xlarge (4U16G)
 - OS: ubuntu 16.04
 - Disk: OS 8GB gp2, Data 40GB megnet
 

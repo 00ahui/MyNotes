@@ -5,9 +5,9 @@
 ### Prepare 1 VM  (or install directly on opensds-1 VM)
 
 Apply an EC2 instance with the following specs :
-- VM: m2.large (2U8G)
+- VM: t2.large (2U8G)
 - OS: ubuntu 16.04
-- Disk: /dev/xvda 8GB gp1, /dev/xvdb 100GB magnet
+- Disk: OS 8GB gp1, Data 40GB magnet
 
 Configure /etc/hosts:
 

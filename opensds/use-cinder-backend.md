@@ -5,7 +5,7 @@
 ### Prepare 1 VM
 
 Apply an EC2 instance with the following specs :
-- VM: m2.large (2U8G)
+- VM: t2.large (2U8G)
 - OS: ubuntu 16.04
 - Disk: OS: 8GB gp2, Data: 8GB magnet
 
