@@ -2,7 +2,7 @@
 
 ## Install Ceph
 
-### Prepare 1 VM
+### Prepare 1 VM  (or install directly on opensds-1 VM)
 
 Apply an EC2 instance with the following specs :
 - VM: m2.large (2U8G)
@@ -91,8 +91,8 @@ ansible-playbook site.yml -i local.hosts
 Create a ceph pool:
 
 ```shell
-ceph osd pool create volumes 64
-rbd pool init volumes
+ceph osd pool create pool0 128
+rbd pool init pool0
 ```
 Show the pool details:
 
@@ -132,7 +132,6 @@ On opensds-1, connect ceph-1 to get admin authentication key and save it to /etc
 ssh -i KeyPair.pem ceph-1 sudo ceph auth get-or-create client.admin | sudo tee /etc/ceph/ceph.client.admin.keyring
 ```
 
-
 ### Configure ceph as backend
 
 Edit  /etc/opensds/opensds.conf
@@ -153,7 +152,7 @@ Edit /etc/opensds/driver/ceph.yaml
 ```shell
 configFile: /etc/ceph/ceph.conf
 pool:
-  volumes: # ceph pool name
+  pool0: # ceph pool name
     storageType: block
     availabilityZone: az2
     extras:
@@ -161,7 +160,7 @@ pool:
         provisioningPolicy: Thin
         isSpaceEfficient: true
       ioConnectivity:
-        accessProtocol: volumes # ceph pool name
+        accessProtocol: rbd
         maxIOPS: 6000000
         maxBWS: 500
       advanced:
@@ -178,7 +177,7 @@ opensds-start
 opensds-status
 ```
 
-### Test ceph backend
+### Test ceph backend (still failed)
 
 Show ceph pools:
 
@@ -191,7 +190,7 @@ osdsctl pool list
 Create volume:
 
 ```shell
-osdsctl volume create 1 -n vol4 -a az2
+osdsctl volume create 1 -n vol5 -a az2
 osdsctl volume list
 ```
 
