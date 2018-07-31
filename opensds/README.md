@@ -388,7 +388,9 @@ make
 Run kubernetes:
 
 ```shell
-echo alias kubectl="$HOME/kubernetes/cluster/kubectl.sh" >> /etc/profile
+echo alias kubectl="$HOME/kubernetes/cluster/kubectl.sh" | sudo tee -a /etc/profile
+source /etc/profile
+
 ALLOW_PRIVILEGED=true \
 FEATURE_GATES=CSIPersistentVolume=true,MountPropagation=true \
 RUNTIME_CONFIG="storage.k8s.io/v1alpha1=true" \
@@ -399,6 +401,37 @@ hack/local-up-cluster.sh
 ### OpenSDS Deployment
 
 https://github.com/opensds/opensds/wiki/OpenSDS-Cluster-Installation-through-Ansible
+
+
+### Test OpenSDS
+
+Set enviorment:
+
+```shell
+echo 'export OPENSDS_ENDPOINT=http://172.31.40.129:50040' | sudo tee -a /etc/profile
+echo 'export OPENSDS_AUTH_STRATEGY=keystone' | sudo tee -a /etc/profile
+source /etc/profile
+source /opt/stack/devstack/openrc admin admin   # parameters: OS_USERNAME, OS_PROJECT_NAME, OS_PASSWORD (default secret)
+```
+
+Show pools:
+
+```shell
+osdsctl pool list
+```
+
+Create default profile:
+
+```shell
+osdsctl profile create '{"name": "default", "description": "default policy"}'
+```
+
+Create and show volume:
+
+```shell
+osdsctl volume create 1 -n vol01
+osdsctl volume list
+```
 
 
 
