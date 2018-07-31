@@ -1,12 +1,4 @@
-# Install OpenSDS one node through ansible
-
-https://github.com/opensds/opensds/wiki/OpenSDS-Cluster-Installation-through-Ansible
-
-Note:
-    Simplest way, but hard to understand
-    Please review opensds-installer/ansible/roles/<roles>/scenarios for the details steps
-
-# Install OpenSDS two nodes replication mannually
+# Install OpenSDS mannually with host replication 
 
 ## Install OpenSDS
 
@@ -334,6 +326,80 @@ systemctl status nginx
 ```
 
 Visit http://<dashboard_public_ip>:8088, login as admin, default password is opensds@123
+
+
+
+# Install OpenSDS through ansible
+
+### Prepare VM
+
+Apply EC2 instances with the following specs :
+- VM: m4.xlarge (4U16G)
+- OS: ubuntu 16.04
+- Disk: OS 8GB gp2, Data 40GB megnet
+
+Install dependency packages:
+
+```shell
+sudo apt update
+sudo apt install git curl wget make gcc zip sysstat libltdl7
+```
+
+Install Golang:
+
+```shell
+wget https://storage.googleapis.com/golang/go1.9.2.linux-amd64.tar.gz
+sudo tar -C /usr/local -xzf go1.9.2.linux-amd64.tar.gz
+echo 'export PATH=$PATH:/usr/local/go/bin' | sudo tee -a /etc/profile
+echo "export GOPATH=$HOME/gopath" | sudo tee -a /etc/profile
+source /etc/profile
+go version
+```
+
+Install docker:
+
+```shell
+wget https://download.docker.com/linux/ubuntu/dists/xenial/pool/stable/amd64/docker-ce_18.03.1~ce-0~ubuntu_amd64.deb
+sudo dpkg -i docker-ce_18.03.1~ce-0~ubuntu_amd64.deb
+sudo docker version
+```
+
+### Kubernetes Local Cluster Deployment
+
+Install etcd:
+
+```shell
+wget https://github.com/coreos/etcd/releases/download/v3.3.0/etcd-v3.3.0-linux-amd64.tar.gz
+tar -xzf etcd-v3.3.0-linux-amd64.tar.gz
+cd etcd-v3.3.0-linux-amd64
+sudo cp -f etcd etcdctl /usr/local/bin/
+cd $HOME
+```
+
+Build kubernete (very long time):
+
+```shell
+git clone https://github.com/kubernetes/kubernetes.git
+cd kubernetes
+git checkout v1.10.0
+make
+```
+
+Run kubernetes:
+
+```shell
+echo alias kubectl="$HOME/kubernetes/cluster/kubectl.sh" >> /etc/profile
+ALLOW_PRIVILEGED=true \
+FEATURE_GATES=CSIPersistentVolume=true,MountPropagation=true \
+RUNTIME_CONFIG="storage.k8s.io/v1alpha1=true" \
+LOG_LEVEL=5 \
+hack/local-up-cluster.sh
+```
+
+### OpenSDS Deployment
+
+https://github.com/opensds/opensds/wiki/OpenSDS-Cluster-Installation-through-Ansible
+
 
 
 
