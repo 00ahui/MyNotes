@@ -401,7 +401,7 @@ hack/local-up-cluster.sh
 
 ### OpenSDS Deployment
 
-Installation:
+Install and run through ansible:
 
 https://github.com/opensds/opensds/wiki/OpenSDS-Cluster-Installation-through-Ansible
 
