@@ -378,8 +378,7 @@ sudo cp -f etcd etcdctl /usr/local/bin/
 Build kubernete (very long time):
 
 ```shell
-sudo su - root
-cd /opt
+cd $HOME
 git clone https://github.com/kubernetes/kubernetes.git
 cd kubernetes
 git checkout v1.10.0
@@ -389,7 +388,7 @@ make
 Run kubernetes:
 
 ```shell
-echo alias kubectl='/opt/kubernetes/cluster/kubectl.sh' | sudo tee -a /etc/profile
+echo alias kubectl="$HOME/kubernetes/cluster/kubectl.sh" | sudo tee -a /etc/profile
 source /etc/profile
 
 ALLOW_PRIVILEGED=true \
