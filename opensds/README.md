@@ -183,7 +183,6 @@ Add /opt/opensds/bin/opensds-start on opensds-2
 
 ```shell
 echo "starting opensds ..."
-osdslet &
 osdsdock &
 osdsdock --config-file /etc/opensds/attacher.conf &
 ```
@@ -205,7 +204,7 @@ echo "opensds killed"
 Add /opt/opensds/bin/opensds-stop on opensds-2
 
 ```shell
-killall osdslet osdsdock
+killall osdsdock
 echo "opensds killed"
 ```
 
