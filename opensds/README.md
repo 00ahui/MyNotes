@@ -63,7 +63,7 @@ Setup enviorment variables:
 
 ```shell
 echo 'export PATH=$PATH:/opt/opensds/bin' | sudo tee -a /etc/profile
-echo 'export OPENSDS_ENDPOINT=http://127.0.0.1:50040' | sudo tee -a /etc/profile
+echo 'export OPENSDS_ENDPOINT=http://172.31.10.16:50040' | sudo tee -a /etc/profile
 echo 'export OPENSDS_AUTH_STRATEGY=keystone' | sudo tee -a /etc/profile
 source /etc/profile
 source /opt/stack/devstack/openrc admin admin
@@ -307,7 +307,7 @@ server {
         listen [::]:8088 default_server;
         root /var/www/html;
         server_name OpenSDS;
-                location /v3/ {
+        location /v3/ {
                 proxy_pass http://172.31.10.16/identity/v3/;
         }
 
