@@ -451,9 +451,6 @@ osdsctl volume create 1 -n vol01
 osdsctl volume list
 ```
 
-
-
-
 # Use different backend storages
 
 
@@ -479,6 +476,9 @@ https://github.com/00ahui/MyNotes/blob/master/opensds/use-dorado-backend.md
 
 # Integrate with different platforms
 
+## Attach volumes to Host 
+
+https://github.com/00ahui/MyNotes/blob/master/opensds/attach-volumes-to-host.md
 
 ## Integrate with Kubernetes
 
