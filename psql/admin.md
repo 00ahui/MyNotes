@@ -2,7 +2,7 @@
 ### Add host permision:
 
 ```shell
-echo 'host all all 10.0.26.0/24 md5' >> /etc/postgresql/9.3/main/pg_hba.conf
+echo 'host all all 10.0.29.0/24 md5' >> /etc/postgresql/9.3/main/pg_hba.conf
 echo "listen_addresses = '*'" >> /etc/postgresql/9.3/main/postgresql.conf
 /etc/init.d/postgresql restart
 ```
@@ -22,7 +22,7 @@ GRANT ALL PRIVILEGES ON DATABASE "coolfsdb" TO coolfsdba;
 List database
 
 ```shell
-\d
+\l
 
 SELECT datname FROM pg_database;
 
