@@ -1,0 +1,16 @@
+-- configure telnet
+system-view
+undo telnet server disable
+commit
+
+user-interface vty 0
+user privilege level 15
+authentication-mode aaa
+protocol inbound telnet
+
+aaa
+local-user administrator password irreversible-cipher Huawei@123
+local-user administrator service-type telnet
+local-user administrator level 15
+commit
+save
