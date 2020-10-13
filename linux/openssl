@@ -4,3 +4,8 @@ openssl aes-128-cbc -salt -in test.txt -out test.txt.aes
 # decrypt
 openssl aes-128-cbc -d -salt -in test.txt.aes -out test.txt.out
 
+# encrypt string
+echo "That's the text" | openssl enc -aes-256-cbc -base64 -pbkdf2
+
+# decrypt string
+echo "U2FsdGVkX1/lIjrm2GBVGFoCJd0zpq80lFIdekn1khZKFpUXunesCTgWVvPn7go7" | openssl enc -base64 -d | openssl enc -aes-256-cbc -d -pbkdf2
